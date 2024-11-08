@@ -53,7 +53,7 @@ target_link_libraries(ModelViewer PRIVATE glfw glm Vulkan::Vulkan)
 
 # Set the working directory to the project source directory
 set_target_properties(ModelViewer PROPERTIES
-    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/Binaries"
+    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 )
 
 # Set binary output directories

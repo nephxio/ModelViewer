@@ -4,6 +4,9 @@
 # PDfs
 .pdf
 
+# Dependencies
+dependencies/
+
 # User-specific files
 *.suo
 *.user
