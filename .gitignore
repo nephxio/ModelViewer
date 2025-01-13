@@ -6,6 +6,10 @@
 
 # Dependencies
 dependencies/
+_deps/
+
+# Compiled shader files
+.spv
 
 # User-specific files
 *.suo
@@ -240,6 +244,3 @@ data/textures/**
 data/README_asset_pack.md
 data/font*.*
 data/roboto*.*
-
-# Project dependencies
-_deps/
