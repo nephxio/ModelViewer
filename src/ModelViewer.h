@@ -3,17 +3,26 @@
 #include "ModelViewerWindow.h"
 #include "ModelViewerPipeline.h"
 
+#include <iostream>
+
 namespace ModelViewer
 {
 	class ModelViewer
 	{
 	public:
-		static constexpr int WIDTH = 800;
-		static constexpr int HEIGHT = 600;
+		ModelViewer();
 
 		void run();
 	private:
-		ModelViewerWindow modelViewerWindow{WIDTH, HEIGHT, "Model Viewer"};
-		ModelViewerPipeline modelViewerPipeline{ "src\\shaders\\simple_shader.vert.spv", "src\\shaders\\simple_shader.frag.spv" };
+		void initialize();
+
+		int WIDTH;
+		int HEIGHT;
+
+		GLFWmonitor* primaryMonitor;
+		const GLFWvidmode* mode;
+
+		std::unique_ptr<ModelViewerWindow> modelViewerWindow; 
+		std::unique_ptr<ModelViewerPipeline> modelViewerPipeline;
 	};
 }

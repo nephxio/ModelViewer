@@ -6,6 +6,12 @@
 
 int main()
 {
+	if (!glfwInit())
+	{
+		std::cerr << "Failed to initialize GLFW!" << std::endl;
+		return EXIT_FAILURE;
+	}
+
 	ModelViewer::ModelViewer modelViewer{};
 
 	try
@@ -18,6 +24,6 @@ int main()
 		return EXIT_FAILURE;
 	}
 
-
+	glfwTerminate();
 	return EXIT_SUCCESS;
 }

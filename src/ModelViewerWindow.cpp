@@ -10,12 +10,10 @@ namespace ModelViewer
 	ModelViewerWindow::~ModelViewerWindow()
 	{
 		glfwDestroyWindow(window);
-		glfwTerminate();
 	}
 
 	void ModelViewerWindow::initWindow()
 	{
-		glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 

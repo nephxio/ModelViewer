@@ -4,12 +4,12 @@
 # PDfs
 .pdf
 
+# Compiled shader files
+.spv
+
 # Dependencies
 dependencies/
 _deps/
-
-# Compiled shader files
-.spv
 
 # User-specific files
 *.suo
