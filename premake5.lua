@@ -9,10 +9,15 @@ IncludeDir = {}
 IncludeDir["GLM"] = "external/glm"
 IncludeDir["GLFW"] = "external/glfw/include"
 IncludeDir["ImGui"] = "external/imgui"
+IncludeDir["VulkanSDK"] = os.getenv("VULKAN_SDK") .. "/Include"
+
+LibDir = {}
+LibDir["VulkanSDK"] = os.getenv("VULKAN_SDK") .. "/Lib"
+
+print("GLM Include Path: " .. IncludeDir["GLM"])
 
 group "Dependencies"
     include "external/glfw"
-    include "external/glm"
     include "external/imgui"
 group ""
 
@@ -28,16 +33,23 @@ project "ModelViewer"
 
     files
     {
-        "%{prj.location}/src/**.h",
-        "%{prj.location}/src/**.cpp"
+        "src/**.h",
+        "src/**.cpp"
     }
 
     includedirs
     {
-        "%{prj.location}/src",
+        "src",
         "%{IncludeDir.GLM}",
         "%{IncludeDir.GLFW}",
-        "%{IncludeDir.ImGui}"
+        "%{IncludeDir.ImGui}",
+        "%{IncludeDir.VulkanSDK}"
+    }
+
+    libdirs
+    {
+        "%{LibDir.VulkanSDK}",
+        "bin/" .. outputdir .. "/GLFW"
     }
 
     links
@@ -50,13 +62,16 @@ project "ModelViewer"
     filter "system:windows"
         systemversion "latest"
         defines { "PLATFORM_WINDOWS" }
+        linkoptions { "/NODEFAULTLIB:LIBCMTD" }
 
     filter "configurations:Debug"
         defines "DEBUG"
         runtime "Debug"
         symbols "on"
+        linkoptions { "/NODEFAULTLIB:LIBCMTD" }
 
     filter "configurations:Release"
         defines "NDEBUG"
         runtime "Release"
         optimize "on"
+        linkoptions { "/NODEFAULTLIB:LIBCMT" }

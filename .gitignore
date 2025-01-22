@@ -25,6 +25,7 @@ x64/
 build/
 bld/
 [Bb]in/
+[Bb]in-int/
 [Oo]bj/
 
 # CMake

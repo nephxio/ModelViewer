@@ -1,7 +1,7 @@
 @echo off
 
 REM Set the URLs for the Premake download and the license file
-set "premake_url=https://github.com/premake/premake-core/releases/download/v5.0.0-alpha16/premake-5.0.0-alpha16-windows.zip"
+set "premake_url=https://github.com/premake/premake-core/releases/download/v5.0.0-beta4/premake-5.0.0-beta4-windows.zip"
 set "license_url=https://raw.githubusercontent.com/premake/premake-core/master/LICENSE.txt"
 
 REM Change directory to the folder containing the script
