@@ -7,13 +7,13 @@ namespace ModelViewer
 		primaryMonitor = glfwGetPrimaryMonitor();
 		if (!primaryMonitor)
 		{
-			std::cerr << "Failed to get primary monitor!" << std::endl;
+			throw std::runtime_error("Failed to get primary monitor!");
 		}
 
 		mode = glfwGetVideoMode(primaryMonitor);
 		if (!mode)
 		{
-			std::cerr << "Failed to get video mode!" << std::endl;
+			throw std::runtime_error("Failed to get video mode!");
 		}
 
 		WIDTH = static_cast<int>(mode->width * 0.75);
