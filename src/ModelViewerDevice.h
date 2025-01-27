@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace lve {
+namespace ModelViewer {
 
 	struct SwapChainSupportDetails {
 		VkSurfaceCapabilitiesKHR capabilities;
@@ -22,7 +22,7 @@ namespace lve {
 		bool isComplete() { return graphicsFamilyHasValue && presentFamilyHasValue; }
 	};
 
-	class LveDevice {
+	class ModelViewerDevice {
 	public:
 #ifdef NDEBUG
 		const bool enableValidationLayers = false;
@@ -30,14 +30,14 @@ namespace lve {
 		const bool enableValidationLayers = true;
 #endif
 
-		LveDevice(LveWindow& window);
-		~LveDevice();
+		ModelViewerDevice(ModelViewerWindow& window);
+		~ModelViewerDevice();
 
 		// Not copyable or movable
-		LveDevice(const LveDevice&) = delete;
-		LveDevice& operator=(const LveDevice&) = delete;
-		LveDevice(LveDevice&&) = delete;
-		LveDevice& operator=(LveDevice&&) = delete;
+		ModelViewerDevice(const ModelViewerDevice&) = delete;
+		ModelViewerDevice& operator=(const ModelViewerDevice&) = delete;
+		ModelViewerDevice(ModelViewerDevice&&) = delete;
+		ModelViewerDevice& operator=(ModelViewerDevice&&) = delete;
 
 		VkCommandPool getCommandPool() { return commandPool; }
 		VkDevice device() { return device_; }
@@ -93,7 +93,7 @@ namespace lve {
 		VkInstance instance;
 		VkDebugUtilsMessengerEXT debugMessenger;
 		VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-		LveWindow& window;
+		ModelViewerWindow& window;
 		VkCommandPool commandPool;
 
 		VkDevice device_;
@@ -105,4 +105,4 @@ namespace lve {
 		const std::vector<const char*> deviceExtensions = { VK_KHR_SWAPCHAIN_EXTENSION_NAME };
 	};
 
-}  // namespace lve
+}  // namespace ModelViewer
