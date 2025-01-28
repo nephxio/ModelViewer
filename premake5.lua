@@ -22,7 +22,7 @@ group "Dependencies"
 group ""
 
 project "ModelViewer"
-    location "ModelViewer"
+    location "src"
     kind "ConsoleApp"
     language "C++"
     cppdialect "C++20"
