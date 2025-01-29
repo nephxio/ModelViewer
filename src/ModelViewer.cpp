@@ -21,7 +21,11 @@ namespace ModelViewer
 
 		// Initialize the modelViewerWindow and modelViewerPipeline with the correct dimensions 
 		modelViewerWindow = std::make_unique<ModelViewerWindow>(WIDTH, HEIGHT, "Vulkan Window"); 
-		modelViewerPipeline = std::make_unique<ModelViewerPipeline>("..\\src\\shaders\\simple_shader.vert.spv", "..\\src\\shaders\\simple_shader.frag.spv");
+		modelViewerDevice = std::make_unique<ModelViewerDevice>(*modelViewerWindow);
+		modelViewerPipeline = std::make_unique<ModelViewerPipeline>(*modelViewerDevice, 
+			"..\\src\\shaders\\simple_shader.vert.spv", 
+			"..\\src\\shaders\\simple_shader.frag.spv",
+			ModelViewerPipeline::defaultPipelineConfigInfo(WIDTH, HEIGHT));
 	}
 
 	void ModelViewer::run()

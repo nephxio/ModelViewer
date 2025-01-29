@@ -4,7 +4,7 @@
 
 [submodule "external/imgui"]
 	path = external/imgui
-	url = git@github.com:nephxio/imguimv.git
+	url = https://github.com/nephxio/imguimv.git
 [submodule "external/glfw"]
 	path = external/glfw
-	url = git@github.com:nephxio/glfwmv.git
+	url = https://github.com/nephxio/glfwmv.git

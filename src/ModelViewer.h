@@ -21,7 +21,7 @@ namespace ModelViewer
 
 		GLFWmonitor* primaryMonitor;
 		const GLFWvidmode* mode;
-
+		std::unique_ptr<ModelViewerDevice> modelViewerDevice;
 		std::unique_ptr<ModelViewerWindow> modelViewerWindow; 
 		std::unique_ptr<ModelViewerPipeline> modelViewerPipeline;
 	};
