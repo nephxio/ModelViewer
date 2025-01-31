@@ -27,7 +27,7 @@ namespace ModelViewer
 	{
 	public:
 		ModelViewerPipeline(ModelViewerDevice& device, const std::string& vertFilepath, const std::string& fragFilepath, const PipelineConfigInfo& configInfo);
-		~ModelViewerPipeline() {}
+		~ModelViewerPipeline();
 
 		ModelViewerPipeline(const ModelViewerPipeline&) = delete;
 		void operator=(const ModelViewerPipeline&) = delete;
@@ -43,8 +43,8 @@ namespace ModelViewer
 
 		ModelViewerDevice& modelViewerDevice;
 		VkPipeline graphicsPipeline;
-		VkShaderModule vertShader;
-		VkShaderModule fragShader;
+		VkShaderModule vertShaderModule;
+		VkShaderModule fragShaderModule;
 
 	};
 }
