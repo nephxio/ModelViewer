@@ -17,6 +17,13 @@ REM Output the current directory and destination folder for debugging
 echo Current Directory: %cd%
 echo Destination Folder: %dest_folder%
 
+REM Check if premake.exe already exists
+if exist "%dest_folder%/premake.exe" (
+    echo Premake executable already exists. Skipping download.
+    pause
+    exit /b 0
+)
+
 REM Create the destination folder if it doesn't exist
 if not exist "%dest_folder%" mkdir "%dest_folder%"
 
@@ -37,8 +44,8 @@ if not exist "%dest_folder%/premake.zip" (
     exit /b 1
 )
 
-REM Unzip the Premake file
-powershell -Command "Expand-Archive -Path '%dest_folder%/premake.zip' -DestinationPath '%dest_folder%'"
+REM Unzip the Premake file with the -Force parameter
+powershell -Command "Expand-Archive -Path '%dest_folder%/premake.zip' -DestinationPath '%dest_folder%' -Force"
 
 REM Check if the unzip operation was successful
 if exist "%dest_folder%/premake.zip" (
