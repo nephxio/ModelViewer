@@ -4,6 +4,7 @@
 #include "ModelViewerWindow.h"
 #include "ModelViewerPipeline.h"
 #include "ModelViewerSwapChain.h"
+#include "ModelViewerModel.h"
 
 #include <iostream>
 #include <memory>
@@ -22,6 +23,7 @@ namespace ModelViewer
 
 		void run();
 	private:
+		void loadModels();
 		void createPipelineLayout();
 		void createPipeline();
 		void createCommandBuffers();
@@ -38,5 +40,6 @@ namespace ModelViewer
 		std::unique_ptr<ModelViewerSwapChain> modelViewerSwapChain;
 		VkPipelineLayout pipelineLayout;
 		std::vector<VkCommandBuffer> commandBuffers;
+		std::unique_ptr<ModelViewerModel> modelViewerModel;
 	};
 }

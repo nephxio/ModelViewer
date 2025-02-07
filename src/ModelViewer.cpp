@@ -27,6 +27,7 @@ namespace ModelViewer
 		modelViewerDevice = std::make_unique<ModelViewerDevice>(*modelViewerWindow);
 		modelViewerSwapChain = std::make_unique<ModelViewerSwapChain>(*modelViewerDevice, modelViewerWindow->getExtent());
 
+		loadModels();
 		createPipelineLayout();
 		createPipeline();
 		createCommandBuffers();
@@ -36,6 +37,18 @@ namespace ModelViewer
 	ModelViewer::~ModelViewer()
 	{
 		vkDestroyPipelineLayout(modelViewerDevice->device(), pipelineLayout, nullptr);
+	}
+
+	void ModelViewer::loadModels()
+	{
+		std::vector<ModelViewerModel::Vertex> vertices
+		{
+			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+			{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+		};
+
+		modelViewerModel = std::make_unique<ModelViewerModel>(*modelViewerDevice, vertices);
 	}
 
 	void ModelViewer::run()
@@ -119,7 +132,8 @@ namespace ModelViewer
 			vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
 			modelViewerPipeline->bind(commandBuffers[i]);
-			vkCmdDraw(commandBuffers[i], 3, 1, 0, 0);
+			modelViewerModel->bind(commandBuffers[i]);
+			modelViewerModel->draw(commandBuffers[i]);
 
 			vkCmdEndRenderPass(commandBuffers[i]);
 			if (vkEndCommandBuffer(commandBuffers[i]) != VK_SUCCESS)
