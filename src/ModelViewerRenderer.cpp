@@ -36,18 +36,19 @@ namespace ModelViewer
 		}
 		else
 		{
-			modelViewerSwapChain = std::make_unique<ModelViewerSwapChain>(*modelViewerDevice, extent, std::move(modelViewerSwapChain));
-			if (modelViewerSwapChain->imageCount() != commandBuffers.size())
+			std::shared_ptr<ModelViewerSwapChain> oldSwapChain = std::move(modelViewerSwapChain);
+			modelViewerSwapChain = std::make_unique<ModelViewerSwapChain>(*modelViewerDevice, extent, oldSwapChain);
+
+			if (!oldSwapChain->compareSwapFormats(*modelViewerSwapChain))
 			{
-				freeCommandBuffers();
-				createCommandBuffers();
+				throw std::runtime_error("Swap chain image or depth format has changed!");
 			}
 		}
 	}
 
 	void ModelViewerRenderer::createCommandBuffers()
 	{
-		commandBuffers.resize(modelViewerSwapChain->imageCount());
+		commandBuffers.resize(ModelViewerSwapChain::MAX_FRAMES_IN_FLIGHT);
 
 		VkCommandBufferAllocateInfo allocInfo{};
 		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
@@ -124,6 +125,7 @@ namespace ModelViewer
 		}
 
 		isFrameStarted = false;
+		currentFrameIndex = (currentFrameIndex + 1) % ModelViewerSwapChain::MAX_FRAMES_IN_FLIGHT;
 	}
 
 	void ModelViewerRenderer::beginSwapChainRenderPass(VkCommandBuffer commandBuffer)

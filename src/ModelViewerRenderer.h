@@ -9,13 +9,6 @@
 
 namespace ModelViewer
 {
-	struct SimplePushConstantData
-	{
-		glm::mat2 transform{ 1.f };
-		glm::vec2 offset;
-		alignas(16) glm::vec3 color;
-	};
-
 	class ModelViewerRenderer
 	{
 	public:
@@ -36,7 +29,13 @@ namespace ModelViewer
 		VkCommandBuffer getCurrentCommandBuffer() const 
 		{ 
 			assert(isFrameStarted && "Cannot get command buffer when frame not in progress!");
-			return commandBuffers[currentImageIndex]; 
+			return commandBuffers[currentFrameIndex]; 
+		}
+
+		int getFrameIndex() const
+		{
+			assert(isFrameStarted && "Cannot get frame index when frame not in progress!");
+			return currentFrameIndex;
 		}
 
 		VkRenderPass getSwapChainRenderPass() const { return modelViewerSwapChain->getRenderPass(); }
@@ -48,10 +47,11 @@ namespace ModelViewer
 
 		std::shared_ptr<ModelViewerWindow> modelViewerWindow;
 		std::shared_ptr<ModelViewerDevice> modelViewerDevice;
-		std::shared_ptr<ModelViewerSwapChain> modelViewerSwapChain;
+		std::unique_ptr<ModelViewerSwapChain> modelViewerSwapChain;
 		std::vector<VkCommandBuffer> commandBuffers;
 
 		uint32_t currentImageIndex;
+		int currentFrameIndex{ 0 };
 		bool isFrameStarted{ false };
 	};
 } // namespace ModelViewer

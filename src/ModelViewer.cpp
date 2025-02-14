@@ -1,9 +1,10 @@
+#include "ModelViewer.h"
+#include "ModelViewerSimpleRenderSystem.h"
+
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
-
-#include "ModelViewer.h"
 
 #include <cassert>
 #include <stdexcept>
@@ -33,50 +34,11 @@ namespace ModelViewer
 		modelViewerRenderer = std::make_unique<ModelViewerRenderer>(modelViewerWindow, modelViewerDevice);
 
 		loadModelObjects();
-		createPipelineLayout();
-		createPipeline();
+
 	}
 
 	ModelViewer::~ModelViewer()
 	{
-		vkDestroyPipelineLayout(modelViewerDevice->device(), pipelineLayout, nullptr);
-	}
-
-	void ModelViewer::createPipelineLayout()
-	{
-		VkPushConstantRange pushConstantRange{};
-		pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
-		pushConstantRange.offset = 0;
-		pushConstantRange.size = sizeof(SimplePushConstantData);
-
-
-		VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
-		pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		pipelineLayoutInfo.setLayoutCount = 0;
-		pipelineLayoutInfo.pSetLayouts = nullptr;
-		pipelineLayoutInfo.pushConstantRangeCount = 1;
-		pipelineLayoutInfo.pPushConstantRanges = &pushConstantRange;
-
-		if (vkCreatePipelineLayout(modelViewerDevice->device(), &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
-		{
-			throw std::runtime_error("Failed to create Pipeline Layout!");
-		}
-	}
-
-	void ModelViewer::createPipeline()
-	{
-		assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout!");
-
-		PipelineConfigInfo pipelineConfig{};
-		ModelViewerPipeline::defaultPipelineConfigInfo(pipelineConfig);
-		pipelineConfig.renderPass = modelViewerRenderer->getSwapChainRenderPass();
-		pipelineConfig.pipelineLayout = pipelineLayout;
-
-		modelViewerPipeline = std::make_unique<ModelViewerPipeline>(*modelViewerDevice,
-			"..\\src\\shaders\\simple_shader.vert.spv",
-			"..\\src\\shaders\\simple_shader.frag.spv",
-			pipelineConfig);
-
 	}
 
 	void ModelViewer::loadModelObjects()
@@ -100,26 +62,9 @@ namespace ModelViewer
 		modelObjects.push_back(std::move(triangle));
 	}
 
-	void ModelViewer::renderModelObjects(VkCommandBuffer commandBuffer)
-	{
-		modelViewerPipeline->bind(commandBuffer);
-
-		for (auto& object : modelObjects)
-		{
-			object.transform2d.rotation = glm::mod(object.transform2d.rotation + .01f, glm::two_pi<float>());
-			SimplePushConstantData push{};
-			push.offset = object.transform2d.translation;
-			push.color = object.color;
-			push.transform = object.transform2d.mat2();
-
-			vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
-			object.model->bind(commandBuffer);
-			object.model->draw(commandBuffer);
-		}
-	}
-
 	void ModelViewer::run()
 	{
+		ModelViewerSimpleRenderSystem simpleRenderSystem{ modelViewerDevice, modelViewerRenderer->getSwapChainRenderPass() };
 		while (!modelViewerWindow->shouldClose())
 		{
 			glfwPollEvents();
@@ -127,7 +72,7 @@ namespace ModelViewer
 			if (auto commandBuffer = modelViewerRenderer->beginFrame())
 			{
 				modelViewerRenderer->beginSwapChainRenderPass(commandBuffer);
-				renderModelObjects(commandBuffer);
+				simpleRenderSystem.renderModelObjects(commandBuffer, modelObjects);
 				modelViewerRenderer->endSwapChainRenderPass(commandBuffer);
 				modelViewerRenderer->endFrame();
 			}
