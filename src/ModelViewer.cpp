@@ -1,21 +1,16 @@
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 
 #include "ModelViewer.h"
 
+#include <cassert>
 #include <stdexcept>
 #include <array>
 
 namespace ModelViewer
 {
-
-	struct SimplePushConstantData
-	{
-		glm::vec2 offset;
-		alignas(16) glm::vec3 color;
-	};
-
 	ModelViewer::ModelViewer()
 	{
 		primaryMonitor = glfwGetPrimaryMonitor();
@@ -33,42 +28,18 @@ namespace ModelViewer
 		WIDTH = static_cast<int>(mode->width * 0.75);
 		HEIGHT = static_cast<int>(mode->height * 0.75);
 
-		// Initialize the modelViewerWindow
-		modelViewerWindow = std::make_unique<ModelViewerWindow>(WIDTH, HEIGHT, "Vulkan Window");
-		modelViewerDevice = std::make_unique<ModelViewerDevice>(*modelViewerWindow);
+		modelViewerWindow = std::make_shared<ModelViewerWindow>(WIDTH, HEIGHT, "Vulkan Window");
+		modelViewerDevice = std::make_shared<ModelViewerDevice>(*modelViewerWindow);
+		modelViewerRenderer = std::make_unique<ModelViewerRenderer>(modelViewerWindow, modelViewerDevice);
 
-		loadModels();
+		loadModelObjects();
 		createPipelineLayout();
-		recreateSwapChain();
-		createCommandBuffers();
+		createPipeline();
 	}
 
 	ModelViewer::~ModelViewer()
 	{
 		vkDestroyPipelineLayout(modelViewerDevice->device(), pipelineLayout, nullptr);
-	}
-
-	void ModelViewer::loadModels()
-	{
-		std::vector<ModelViewerModel::Vertex> vertices
-		{
-			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-			{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
-		};
-
-		modelViewerModel = std::make_unique<ModelViewerModel>(*modelViewerDevice, vertices);
-	}
-
-	void ModelViewer::run()
-	{
-		while (!modelViewerWindow->shouldClose())
-		{
-			glfwPollEvents();
-			drawFrame();
-		}
-
-		vkDeviceWaitIdle(modelViewerDevice->device());
 	}
 
 	void ModelViewer::createPipelineLayout()
@@ -94,12 +65,11 @@ namespace ModelViewer
 
 	void ModelViewer::createPipeline()
 	{
-		assert(modelViewerSwapChain != nullptr && "Cannot create pipeline before swap chain!");
 		assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout!");
 
 		PipelineConfigInfo pipelineConfig{};
 		ModelViewerPipeline::defaultPipelineConfigInfo(pipelineConfig);
-		pipelineConfig.renderPass = modelViewerSwapChain->getRenderPass();
+		pipelineConfig.renderPass = modelViewerRenderer->getSwapChainRenderPass();
 		pipelineConfig.pipelineLayout = pipelineLayout;
 
 		modelViewerPipeline = std::make_unique<ModelViewerPipeline>(*modelViewerDevice,
@@ -109,147 +79,60 @@ namespace ModelViewer
 
 	}
 
-	void ModelViewer::recreateSwapChain()
+	void ModelViewer::loadModelObjects()
 	{
-		auto extent = modelViewerWindow->getExtent();
-
-		while (extent.width == 0 || extent.height == 0)
+		std::vector<ModelViewerModel::Vertex> vertices
 		{
-			extent = modelViewerWindow->getExtent();
-			glfwWaitEvents();
+			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+			{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+		};
+
+		auto modelViewerModel = std::make_shared<ModelViewerModel>(*modelViewerDevice, vertices);
+
+		auto triangle = ModelViewerObject::createGameObject();
+		triangle.model = modelViewerModel;
+		triangle.color = { 0.1f, 0.8f, 0.1f };
+		triangle.transform2d.translation.x = 0.2f;
+		triangle.transform2d.scale = { 1.0f, 1.0f };
+		triangle.transform2d.rotation = .25 * glm::two_pi<float>();
+
+		modelObjects.push_back(std::move(triangle));
+	}
+
+	void ModelViewer::renderModelObjects(VkCommandBuffer commandBuffer)
+	{
+		modelViewerPipeline->bind(commandBuffer);
+
+		for (auto& object : modelObjects)
+		{
+			object.transform2d.rotation = glm::mod(object.transform2d.rotation + .01f, glm::two_pi<float>());
+			SimplePushConstantData push{};
+			push.offset = object.transform2d.translation;
+			push.color = object.color;
+			push.transform = object.transform2d.mat2();
+
+			vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
+			object.model->bind(commandBuffer);
+			object.model->draw(commandBuffer);
+		}
+	}
+
+	void ModelViewer::run()
+	{
+		while (!modelViewerWindow->shouldClose())
+		{
+			glfwPollEvents();
+
+			if (auto commandBuffer = modelViewerRenderer->beginFrame())
+			{
+				modelViewerRenderer->beginSwapChainRenderPass(commandBuffer);
+				renderModelObjects(commandBuffer);
+				modelViewerRenderer->endSwapChainRenderPass(commandBuffer);
+				modelViewerRenderer->endFrame();
+			}
 		}
 
 		vkDeviceWaitIdle(modelViewerDevice->device());
-
-		if (modelViewerSwapChain == nullptr)
-		{
-			modelViewerSwapChain = std::make_unique<ModelViewerSwapChain>(*modelViewerDevice, extent);
-		}
-		else
-		{
-			modelViewerSwapChain = std::make_unique <ModelViewerSwapChain> (*modelViewerDevice, extent, std::move(modelViewerSwapChain));
-			if (modelViewerSwapChain->imageCount() != commandBuffers.size())
-			{
-				freeCommandBuffers();
-				createCommandBuffers();
-			}
-		}
-		createPipeline();
-	}
-
-	void ModelViewer::createCommandBuffers()
-	{
-		commandBuffers.resize(modelViewerSwapChain->imageCount());
-
-		VkCommandBufferAllocateInfo allocInfo{};
-		allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-		allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-		allocInfo.commandPool = modelViewerDevice->getCommandPool();
-		allocInfo.commandBufferCount = static_cast<uint32_t>(commandBuffers.size());
-
-		if (vkAllocateCommandBuffers(modelViewerDevice->device(), &allocInfo, commandBuffers.data()) != VK_SUCCESS)
-		{
-			throw std::runtime_error("Failed to allocate Command Buffers!");
-		}
-	}
-
-	void ModelViewer::freeCommandBuffers()
-	{
-		vkFreeCommandBuffers(modelViewerDevice->device(), modelViewerDevice->getCommandPool(), static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
-		commandBuffers.clear();
-	}
-
-	void ModelViewer::recordCommandBuffer(int imageIndex)
-	{
-		static int frame = 0;
-		frame = (frame + 1) % 1000;
-
-		VkCommandBufferBeginInfo beginInfo{};
-		beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-		if (vkBeginCommandBuffer(commandBuffers[imageIndex], &beginInfo) != VK_SUCCESS)
-		{
-			throw std::runtime_error("Failed to begin recording Command Buffer!");
-		}
-
-		VkRenderPassBeginInfo renderPassInfo{};
-		renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-		renderPassInfo.renderPass = modelViewerSwapChain->getRenderPass();
-		renderPassInfo.framebuffer = modelViewerSwapChain->getFrameBuffer(imageIndex);
-		renderPassInfo.renderArea.offset = { 0, 0 };
-		renderPassInfo.renderArea.extent = modelViewerSwapChain->getSwapChainExtent();
-
-		std::array<VkClearValue, 2> clearValues{};
-		clearValues[0].color = { 0.01f, 0.1f, 0.1f, 1.0f };
-		clearValues[1].depthStencil = { 1.0f, 0 };
-
-		renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
-		renderPassInfo.pClearValues = clearValues.data();
-
-		vkCmdBeginRenderPass(commandBuffers[imageIndex], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-		VkViewport viewport{};
-		viewport.x = 0.0f;
-		viewport.y = 0.0f;
-		viewport.width = static_cast<float>(modelViewerSwapChain->getSwapChainExtent().width);
-		viewport.height = static_cast<float>(modelViewerSwapChain->getSwapChainExtent().height);
-		viewport.minDepth = 0.0f;
-		viewport.maxDepth = 1.0f;
-		VkRect2D scissor{ {0,0}, modelViewerSwapChain->getSwapChainExtent() };
-		vkCmdSetViewport(commandBuffers[imageIndex], 0, 1, &viewport);
-		vkCmdSetScissor(commandBuffers[imageIndex], 0, 1, &scissor);
-
-		modelViewerPipeline->bind(commandBuffers[imageIndex]);
-		modelViewerModel->bind(commandBuffers[imageIndex]);
-
-		for (int j = 0; j < 4; j++)
-		{
-			SimplePushConstantData push{};
-			push.offset = { -0.5f + frame * 0.0002f, -0.4f + j * 0.25 };
-			push.color = { 0.0f, 0.0f, 0.2f + 0.2f * j };
-
-			vkCmdPushConstants(commandBuffers[imageIndex], pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
-
-			modelViewerModel->draw(commandBuffers[imageIndex]);
-		}
-
-		vkCmdEndRenderPass(commandBuffers[imageIndex]);
-		if (vkEndCommandBuffer(commandBuffers[imageIndex]) != VK_SUCCESS)
-		{
-			throw std::runtime_error("Failed to record command buffer!");
-		}
-	}
-
-	void ModelViewer::drawFrame()
-	{
-		uint32_t imageIndex;
-		auto result = modelViewerSwapChain->acquireNextImage(&imageIndex);
-
-		if (result == VK_ERROR_OUT_OF_DATE_KHR)
-		{
-			recreateSwapChain();
-			return;
-		}
-
-		if (result != VK_SUCCESS && VK_SUBOPTIMAL_KHR)
-		{
-			throw std::runtime_error("Failed to acquire next swap chain image!");
-		}
-
-		recordCommandBuffer(imageIndex);
-		result = modelViewerSwapChain->submitCommandBuffers(&commandBuffers[imageIndex], &imageIndex);
-
-		if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || modelViewerWindow->wasWindowResized())
-		{
-			modelViewerWindow->resetWindowResizedFlag();
-			recreateSwapChain();
-			return;
-		}
-
-		if (result != VK_SUCCESS)
-		{
-			throw std::runtime_error("Failed to present swap chain image!");
-		}
-
 	}
 }

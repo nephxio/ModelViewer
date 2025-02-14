@@ -3,8 +3,10 @@
 #include "ModelViewerDevice.h"
 #include "ModelViewerWindow.h"
 #include "ModelViewerPipeline.h"
+#include "ModelViewerRenderer.h"
 #include "ModelViewerSwapChain.h"
 #include "ModelViewerModel.h"
+#include "ModelViewerObject.h"
 
 #include <iostream>
 #include <memory>
@@ -23,26 +25,23 @@ namespace ModelViewer
 
 		void run();
 	private:
-		void loadModels();
+
+		void loadModelObjects();
 		void createPipelineLayout();
 		void createPipeline();
-		void createCommandBuffers();
-		void freeCommandBuffers();
-		void drawFrame();
-		void recreateSwapChain();
-		void recordCommandBuffer(int imageIndex);
-
+		void renderModelObjects(VkCommandBuffer commandBuffer);
+		
 		int WIDTH;
 		int HEIGHT;
 
 		GLFWmonitor* primaryMonitor;
 		const GLFWvidmode* mode;
-		std::unique_ptr<ModelViewerDevice> modelViewerDevice;
-		std::unique_ptr<ModelViewerWindow> modelViewerWindow; 
+
+		std::shared_ptr<ModelViewerWindow> modelViewerWindow;
+		std::shared_ptr<ModelViewerDevice> modelViewerDevice;
+		std::unique_ptr<ModelViewerRenderer> modelViewerRenderer;
 		std::unique_ptr<ModelViewerPipeline> modelViewerPipeline;
-		std::unique_ptr<ModelViewerSwapChain> modelViewerSwapChain;
 		VkPipelineLayout pipelineLayout;
-		std::vector<VkCommandBuffer> commandBuffers;
-		std::unique_ptr<ModelViewerModel> modelViewerModel;
+		std::vector<ModelViewerObject> modelObjects;
 	};
 }
