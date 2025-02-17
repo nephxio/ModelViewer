@@ -39,6 +39,7 @@ namespace ModelViewer
 		}
 
 		VkRenderPass getSwapChainRenderPass() const { return modelViewerSwapChain->getRenderPass(); }
+		float getAspectRatio() const { return modelViewerSwapChain->extentAspectRatio(); }
 
 	private:
 		void createCommandBuffers();

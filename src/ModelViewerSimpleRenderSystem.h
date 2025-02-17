@@ -1,5 +1,6 @@
 #pragma once
 
+#include "ModelViewerCamera.h"
 #include "ModelViewerDevice.h"
 #include "ModelViewerPipeline.h"
 #include "ModelViewerObject.h"
@@ -24,7 +25,7 @@ namespace ModelViewer
 		ModelViewerSimpleRenderSystem(const ModelViewerSimpleRenderSystem&) = delete;
 		ModelViewerSimpleRenderSystem& operator=(const ModelViewerSimpleRenderSystem&) = delete;
 
-		void renderModelObjects(VkCommandBuffer commandBuffer, std::vector<ModelViewerObject>& modelObjects);
+		void renderModelObjects(VkCommandBuffer commandBuffer, std::vector<ModelViewerObject>& modelObjects, const ModelViewerCamera& camera);
 	private:
 ;
 		void createPipelineLayout();

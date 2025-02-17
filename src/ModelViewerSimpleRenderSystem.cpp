@@ -59,7 +59,7 @@ namespace ModelViewer
 
 	}
 
-	void ModelViewerSimpleRenderSystem::renderModelObjects(VkCommandBuffer commandBuffer, std::vector<ModelViewerObject>& modelObjects)
+	void ModelViewerSimpleRenderSystem::renderModelObjects(VkCommandBuffer commandBuffer, std::vector<ModelViewerObject>& modelObjects, const ModelViewerCamera& camera)
 	{
 		modelViewerPipeline->bind(commandBuffer);
 
@@ -68,7 +68,7 @@ namespace ModelViewer
 			object.transform.rotation.y = glm::mod(object.transform.rotation.y + 0.0001f, glm::two_pi<float>());
 			SimplePushConstantData push{};
 			push.color = object.color;
-			push.transform = object.transform.mat4();
+			push.transform = camera.getProjection() * object.transform.mat4();
 
 			vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(SimplePushConstantData), &push);
 			object.model->bind(commandBuffer);

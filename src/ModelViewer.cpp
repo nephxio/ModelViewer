@@ -1,5 +1,6 @@
 #include "ModelViewer.h"
 #include "ModelViewerSimpleRenderSystem.h"
+#include "ModelViewerCamera.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -106,7 +107,7 @@ namespace ModelViewer
 		auto cube = ModelViewerObject::createGameObject();
 		cube.model = cubeModel;
 
-		cube.transform.translation = { 0.0f, 0.0f, 0.5f };
+		cube.transform.translation = { 0.0f, 0.0f, 2.5f };
 		cube.transform.scale = { 0.5f, 0.5f, 0.5f };
 	
 		modelObjects.push_back(std::move(cube));
@@ -115,14 +116,20 @@ namespace ModelViewer
 	void ModelViewer::run()
 	{
 		ModelViewerSimpleRenderSystem simpleRenderSystem{ modelViewerDevice, modelViewerRenderer->getSwapChainRenderPass() };
+		ModelViewerCamera camera{};
+
 		while (!modelViewerWindow->shouldClose())
 		{
 			glfwPollEvents();
 
+			float aspect = modelViewerRenderer->getAspectRatio();
+			//camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
+			camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
+
 			if (auto commandBuffer = modelViewerRenderer->beginFrame())
 			{
 				modelViewerRenderer->beginSwapChainRenderPass(commandBuffer);
-				simpleRenderSystem.renderModelObjects(commandBuffer, modelObjects);
+				simpleRenderSystem.renderModelObjects(commandBuffer, modelObjects, camera);
 				modelViewerRenderer->endSwapChainRenderPass(commandBuffer);
 				modelViewerRenderer->endFrame();
 			}
