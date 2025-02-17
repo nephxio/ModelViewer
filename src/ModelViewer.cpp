@@ -1,6 +1,7 @@
 #include "ModelViewer.h"
 #include "ModelViewerSimpleRenderSystem.h"
 #include "ModelViewerCamera.h"
+#include "ModelViewerKeyboardController.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -10,6 +11,7 @@
 #include <cassert>
 #include <stdexcept>
 #include <array>
+#include <chrono>
 
 namespace ModelViewer
 {
@@ -104,7 +106,7 @@ namespace ModelViewer
 	{
 		std::shared_ptr<ModelViewerModel> cubeModel = createCubeModel(*modelViewerDevice, { 0.0f, 0.0f, 0.0f });
 
-		auto cube = ModelViewerObject::createGameObject();
+		auto cube = ModelViewerObject::createObject();
 		cube.model = cubeModel;
 
 		cube.transform.translation = { 0.0f, 0.0f, 2.5f };
@@ -118,12 +120,25 @@ namespace ModelViewer
 		ModelViewerSimpleRenderSystem simpleRenderSystem{ modelViewerDevice, modelViewerRenderer->getSwapChainRenderPass() };
 		ModelViewerCamera camera{};
 
+		camera.setViewDirection(glm::vec3(0.0f), glm::vec3(0.5f, 0.0f, 1.0f));
+
+		auto viewerObject = ModelViewerObject::createObject();
+		ModelViewerKeyboardController cameraController{};
+
+		auto currentTime = std::chrono::high_resolution_clock::now();
+
 		while (!modelViewerWindow->shouldClose())
 		{
 			glfwPollEvents();
+			auto newTime = std::chrono::high_resolution_clock::now();
+			float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
+
+			currentTime = newTime;
+
+			cameraController.moveInPlaneXZ(modelViewerWindow->getGLFWWindow(), frameTime, viewerObject);
+			camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
 
 			float aspect = modelViewerRenderer->getAspectRatio();
-			//camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
 			camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
 
 			if (auto commandBuffer = modelViewerRenderer->beginFrame())

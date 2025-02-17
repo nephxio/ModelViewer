@@ -48,7 +48,7 @@ namespace ModelViewer
 	public:
 		using id_t = unsigned int;
 
-		static ModelViewerObject createGameObject()
+		static ModelViewerObject createObject()
 		{
 			static id_t currentId = 0;
 			return ModelViewerObject{ currentId++ };
