@@ -16,7 +16,7 @@ namespace ModelViewer
 
 		struct Vertex
 		{
-			glm::vec2 position;
+			glm::vec3 position;
 			glm::vec3 color;
 
 			static std::vector<VkVertexInputBindingDescription> getBindingDescriptions();
