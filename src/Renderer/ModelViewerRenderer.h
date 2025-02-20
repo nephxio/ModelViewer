@@ -25,6 +25,7 @@ namespace ModelViewer
 		void endSwapChainRenderPass(VkCommandBuffer commandBuffer);
 
 		bool isFrameInProgress() const { return isFrameStarted; }
+		std::shared_ptr<ModelViewerSwapChain> getSwapChain() { return modelViewerSwapChain; }
 
 		VkCommandBuffer getCurrentCommandBuffer() const 
 		{ 
@@ -48,7 +49,7 @@ namespace ModelViewer
 
 		std::shared_ptr<ModelViewerWindow> modelViewerWindow;
 		std::shared_ptr<ModelViewerDevice> modelViewerDevice;
-		std::unique_ptr<ModelViewerSwapChain> modelViewerSwapChain;
+		std::shared_ptr<ModelViewerSwapChain> modelViewerSwapChain;
 		std::vector<VkCommandBuffer> commandBuffers;
 
 		uint32_t currentImageIndex;

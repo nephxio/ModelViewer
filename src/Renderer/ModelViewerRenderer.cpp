@@ -32,12 +32,12 @@ namespace ModelViewer
 
 		if (modelViewerSwapChain == nullptr)
 		{
-			modelViewerSwapChain = std::make_unique<ModelViewerSwapChain>(*modelViewerDevice, extent);
+			modelViewerSwapChain = std::make_shared<ModelViewerSwapChain>(*modelViewerDevice, extent);
 		}
 		else
 		{
 			std::shared_ptr<ModelViewerSwapChain> oldSwapChain = std::move(modelViewerSwapChain);
-			modelViewerSwapChain = std::make_unique<ModelViewerSwapChain>(*modelViewerDevice, extent, oldSwapChain);
+			modelViewerSwapChain = std::make_shared<ModelViewerSwapChain>(*modelViewerDevice, extent, oldSwapChain);
 
 			if (!oldSwapChain->compareSwapFormats(*modelViewerSwapChain))
 			{
