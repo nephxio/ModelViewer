@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ModelViewerCamera.h"
+#include "Camera/ModelViewerCamera.h"
 #include "ModelViewerDevice.h"
 #include "ModelViewerPipeline.h"
 #include "ModelViewerObject.h"

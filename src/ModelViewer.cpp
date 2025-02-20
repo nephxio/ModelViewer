@@ -1,7 +1,7 @@
 #include "ModelViewer.h"
-#include "ModelViewerSimpleRenderSystem.h"
-#include "ModelViewerCamera.h"
-#include "ModelViewerKeyboardController.h"
+#include "Renderer/ModelViewerSimpleRenderSystem.h"
+#include "Camera/ModelViewerCamera.h"
+#include "Input/ModelViewerKeyboardController.h"
 
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE

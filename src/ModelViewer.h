@@ -2,7 +2,7 @@
 
 #include "ModelViewerDevice.h"
 #include "ModelViewerWindow.h"
-#include "ModelViewerRenderer.h"
+#include "Renderer/ModelViewerRenderer.h"
 #include "ModelViewerObject.h"
 
 #include <memory>
