@@ -49,7 +49,8 @@ project "ModelViewer"
     libdirs
     {
         "%{LibDir.VulkanSDK}",
-        "bin/" .. outputdir .. "/GLFW"
+        "bin/" .. outputdir .. "/GLFW",
+		"bin/" .. outputdir .. "/ImGui"
     }
 
     links
