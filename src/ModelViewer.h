@@ -4,6 +4,7 @@
 #include "ModelViewerWindow.h"
 #include "Renderer/ModelViewerRenderer.h"
 #include "ModelViewerObject.h"
+#include "Renderer/ImGuiRenderer.h"
 
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
@@ -23,10 +24,6 @@ namespace ModelViewer
 		ModelViewer(const ModelViewer&) = delete;
 		ModelViewer &operator=(const ModelViewer&) = delete;
 
-		void init_imgui();
-		void SetupVulkanWindow(ImGui_ImplVulkanH_Window* wd, VkSurfaceKHR surface, int width, int height);
-		void FrameRender(ImGui_ImplVulkanH_Window* wd, ImDrawData* draw_data);
-		void FramePresent(ImGui_ImplVulkanH_Window* wd);
 		void run();
 	private:
 
@@ -40,7 +37,7 @@ namespace ModelViewer
 
 		std::shared_ptr<ModelViewerWindow> modelViewerWindow;
 		std::shared_ptr<ModelViewerDevice> modelViewerDevice;
-		std::unique_ptr<ModelViewerRenderer> modelViewerRenderer;
+		std::shared_ptr<ModelViewerRenderer> modelViewerRenderer;
 		std::vector<ModelViewerObject> modelObjects;
 	};
 }
