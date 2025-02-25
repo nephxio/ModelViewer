@@ -15,9 +15,9 @@ namespace ModelViewer
 
 	ImGuiRenderer::~ImGuiRenderer()
 	{
-		vkDestroyDescriptorPool(modelViewerDevice->device(), descriptorPool, nullptr);
 		ImGui_ImplVulkan_Shutdown();
 		ImGui_ImplGlfw_Shutdown();
+		vkDestroyDescriptorPool(modelViewerDevice->device(), descriptorPool, nullptr);
 		ImGui::DestroyContext();
 	}
 
