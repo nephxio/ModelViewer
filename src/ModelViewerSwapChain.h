@@ -28,11 +28,13 @@ namespace ModelViewer {
 		VkFramebuffer getFrameBuffer(int index) { return swapChainFramebuffers[index]; }
 		VkRenderPass getRenderPass() { return renderPass; }
 		VkImageView getImageView(int index) { return swapChainImageViews[index]; }
+		std::vector<VkImageView> getImageViews() { return swapChainImageViews; }
 		size_t imageCount() { return swapChainImages.size(); }
 		VkFormat getSwapChainImageFormat() { return swapChainImageFormat; }
 		VkExtent2D getSwapChainExtent() { return swapChainExtent; }
 		uint32_t width() { return swapChainExtent.width; }
 		uint32_t height() { return swapChainExtent.height; }
+		void resetFrameIndex() { currentFrame = 0; }
 
 		float extentAspectRatio() {
 			return static_cast<float>(swapChainExtent.width) / static_cast<float>(swapChainExtent.height);

@@ -14,12 +14,7 @@
 #include <chrono>
 
 namespace ModelViewer
-{
-	static bool                     g_SwapChainRebuild = false;
-	static ImGui_ImplVulkanH_Window g_MainWindowData;
-
-
-
+{	
 	static void check_vk_result(VkResult err)
 	{
 		if (err == 0)
@@ -131,7 +126,7 @@ namespace ModelViewer
 
 	void ModelViewer::run()
 	{
-		ImGuiRenderer imGuiRenderer{ modelViewerDevice, modelViewerWindow, modelViewerRenderer };
+		ImGuiRenderer imguiRenderer{ modelViewerDevice, modelViewerWindow, modelViewerRenderer };
 		ModelViewerSimpleRenderSystem simpleRenderSystem{ modelViewerDevice, modelViewerRenderer->getSwapChainRenderPass() };
 		ModelViewerCamera camera{};
 
@@ -141,53 +136,6 @@ namespace ModelViewer
 		ModelViewerKeyboardController cameraController{};
 
 		auto currentTime = std::chrono::high_resolution_clock::now();
-
-		imGuiRenderer.init_imgui();
-
-		// Setup Dear ImGui context
-		IMGUI_CHECKVERSION();
-		ImGui::CreateContext();
-		ImGuiIO& io = ImGui::GetIO(); (void)io;
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-		io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // Enable Docking
-		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;       // Enable Multi-Viewport / Platform Windows
-
-		// Setup Dear ImGui style
-		ImGui::StyleColorsDark();
-		//ImGui::StyleColorsLight();
-
-		ImGuiStyle& style = ImGui::GetStyle();
-		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-		{
-			style.WindowRounding = 0.0f;
-			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
-		}
-
-		// Setup Platform/Renderer backends
-		ImGui_ImplGlfw_InitForVulkan(modelViewerWindow->getGLFWWindow(), true);
-		ImGui_ImplVulkan_InitInfo init_info = {};
-		//init_info.ApiVersion = VK_API_VERSION_1_3;              // Pass in your value of VkApplicationInfo::apiVersion, otherwise will default to header version.
-		init_info.Instance = modelViewerDevice->getInstance();
-		init_info.PhysicalDevice = modelViewerDevice->getPhysicalDevice();
-		init_info.Device = modelViewerDevice->device();
-		init_info.QueueFamily = ImGui_ImplVulkanH_SelectQueueFamilyIndex(modelViewerDevice->getPhysicalDevice());
-		init_info.Queue = modelViewerDevice->graphicsQueue();
-		init_info.PipelineCache = imGuiRenderer.getPipelineCache();
-		init_info.DescriptorPool = imGuiRenderer.getDescriptorPool();
-		init_info.RenderPass = imGuiRenderer.getWindow()->RenderPass;
-		init_info.Subpass = 0;
-		init_info.MinImageCount = imGuiRenderer.getMinImageCount();
-		init_info.ImageCount = imGuiRenderer.getWindow()->ImageCount;
-		init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
-		init_info.Allocator = imGuiRenderer.getAllocator();
-		init_info.CheckVkResultFn = check_vk_result;
-		ImGui_ImplVulkan_Init(&init_info);
-
-		// Our state
-		bool show_demo_window = true;
-		bool show_another_window = false;
-		ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
 		while (!modelViewerWindow->shouldClose())
 		{
@@ -203,42 +151,24 @@ namespace ModelViewer
 			float aspect = modelViewerRenderer->getAspectRatio();
 			camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
 
-			int fb_width, fb_height;
-			glfwGetFramebufferSize(modelViewerWindow->getGLFWWindow(), &fb_width, &fb_height);
-			if (fb_width > 0 && fb_height > 0 && (g_SwapChainRebuild || g_MainWindowData.Width != fb_width || g_MainWindowData.Height != fb_height))
-			{
-				ImGui_ImplVulkan_SetMinImageCount(imGuiRenderer.getMinImageCount());
-				ImGui_ImplVulkanH_CreateOrResizeWindow(modelViewerDevice->getInstance(), 
-					modelViewerDevice->getPhysicalDevice(), 
-					modelViewerDevice->device(), 
-					imGuiRenderer.getWindow(),
-					ImGui_ImplVulkanH_SelectQueueFamilyIndex(modelViewerDevice->getPhysicalDevice()), 
-					imGuiRenderer.getAllocator(), 
-					fb_width, 
-					fb_height, imGuiRenderer.getMinImageCount());
-				g_MainWindowData.FrameIndex = 0;
-				g_SwapChainRebuild = false;
-			}
-			if (glfwGetWindowAttrib(modelViewerWindow->getGLFWWindow(), GLFW_ICONIFIED) != 0)
-			{
-				ImGui_ImplGlfw_Sleep(10);
-				continue;
-			}
-
-			// Start the Dear ImGui frame
 			ImGui_ImplVulkan_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
-
 			ImGui::NewFrame();
-
-			imGuiRenderer.showDemoWindow(io, show_demo_window, show_another_window, clear_color);
 
 			if (auto commandBuffer = modelViewerRenderer->beginFrame())
 			{
 				modelViewerRenderer->beginSwapChainRenderPass(commandBuffer);
 				simpleRenderSystem.renderModelObjects(commandBuffer, modelObjects, camera);
+				imguiRenderer.drawDemo(true, true, ImVec4(0.45f, 0.55f, 0.60f, 1.00f));
 				modelViewerRenderer->endSwapChainRenderPass(commandBuffer);
 				modelViewerRenderer->endFrame();
+			}
+
+			// Update and Render additional Platform Windows
+			if (imguiRenderer.getImGuiIO()->ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+			{
+				ImGui::UpdatePlatformWindows();
+				ImGui::RenderPlatformWindowsDefault();
 			}
 		}
 
