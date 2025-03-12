@@ -1,2 +1,2 @@
 # ModelViewer
-Model Viewer for .fbx files written with Vulkan
+Model Viewer for .obj files written with Vulkan
