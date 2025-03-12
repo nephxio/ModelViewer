@@ -20,6 +20,8 @@ namespace ModelViewer
 
 		bool shouldClose() { return glfwWindowShouldClose(window); }
 		VkExtent2D getExtent() { return { static_cast<uint32_t>(width), static_cast<uint32_t>(height) }; }
+		int getWidth() { return (uint32_t)width; }
+		int getHeight() { return (uint32_t)height; }
 		bool wasWindowResized() { return frameBufferResized; }
 		void resetWindowResizedFlag() { frameBufferResized = false; }
 		GLFWwindow* getGLFWWindow() const { return window; }

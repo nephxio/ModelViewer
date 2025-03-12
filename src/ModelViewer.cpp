@@ -121,7 +121,7 @@ namespace ModelViewer
 		ModelViewerSimpleRenderSystem simpleRenderSystem{ modelViewerDevice, modelViewerRenderer->getSwapChainRenderPass() };
 		ModelViewerCamera camera{};
 
-		camera.setViewDirection(glm::vec3(0.0f), glm::vec3(0.5f, 0.0f, -1.0f));
+		//camera.setViewDirection(glm::vec3(0.0f), glm::vec3(0.0f, 0.0f, -1.0f));
 
 		auto viewerObject = ModelViewerObject::createObject();
 		ModelViewerKeyboardController cameraController{};
@@ -136,21 +136,24 @@ namespace ModelViewer
 
 			currentTime = newTime;
 
-			cameraController.moveInPlaneXZ(modelViewerWindow->getGLFWWindow(), frameTime, viewerObject);
-			camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
+			//cameraController.moveInPlaneXZ(modelViewerWindow->getGLFWWindow(), frameTime, viewerObject);
+			//camera.setViewYXZ(viewerObject.transform.translation, viewerObject.transform.rotation);
 
-			float aspect = modelViewerRenderer->getAspectRatio();
-			camera.setPerspectiveProjection(glm::radians(50.0f), aspect, 0.1f, 10.0f);
+			//float aspect = modelViewerRenderer->getAspectRatio();
+			//camera.setPerspectiveProjection(glm::radians(50.0f), modelViewerWindow->getWidth(), modelViewerWindow->getHeight(), 0.1f, 10.0f);
 
 			ImGui_ImplVulkan_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
 			ImGui::NewFrame();
 
+			ModelViewerObject* objectptr = &modelObjects[0];
+
 			if (auto commandBuffer = modelViewerRenderer->beginFrame())
 			{
 				modelViewerRenderer->beginSwapChainRenderPass(commandBuffer);
 				simpleRenderSystem.renderModelObjects(commandBuffer, modelObjects, camera);
-				imguiRenderer.drawDemo(true, true, ImVec4(0.45f, 0.55f, 0.60f, 1.00f));
+				imguiRenderer.renderUI(objectptr);
+				imguiRenderer.drawUI();
 				modelViewerRenderer->endSwapChainRenderPass(commandBuffer);
 				modelViewerRenderer->endFrame();
 			}

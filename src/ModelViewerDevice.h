@@ -45,6 +45,7 @@ namespace ModelViewer {
 		VkQueue graphicsQueue() { return graphicsQueue_; }
 		VkQueue presentQueue() { return presentQueue_; }
 		VkInstance getInstance() { return instance; }
+		ModelViewerWindow& getWindow() { return window; }
 		VkPhysicalDevice getPhysicalDevice(){ return physicalDevice; }
 
 		SwapChainSupportDetails getSwapChainSupport() { return querySwapChainSupport(physicalDevice); }

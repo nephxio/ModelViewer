@@ -12,8 +12,8 @@ namespace ModelViewer
 {
 	struct SimplePushConstantData
 	{
+		glm::mat4 viewProjection{ 1.f };
 		glm::mat4 transform{ 1.f };
-		alignas(16) glm::vec3 color;
 	};
 
 	class ModelViewerSimpleRenderSystem

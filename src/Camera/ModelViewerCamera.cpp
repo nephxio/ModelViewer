@@ -36,6 +36,11 @@ namespace ModelViewer
 		projectionMatrix[3][2] = -(far * near) / (far - near);
 	}
 
+	void ModelViewerCamera::setPerspectiveProjection(float fovy, float width, float height, float near, float far)
+	{
+		//projectionMatrix = glm::perspectiveFov(fovy, width, height, 0.1f, 100.f);
+	}
+
 	void ModelViewerCamera::setViewDirection(glm::vec3 position, glm::vec3 direction, glm::vec3 up) {
 		const glm::vec3 w{ glm::normalize(direction) };
 		const glm::vec3 u{ glm::normalize(glm::cross(w, up)) };

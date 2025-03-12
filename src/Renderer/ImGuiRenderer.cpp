@@ -1,5 +1,7 @@
 #include "ImGuiRenderer.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 #include "ModelViewerDevice.h"
 #include "ModelViewerRenderer.h"
 #include "ModelViewerWindow.h"
@@ -118,7 +120,21 @@ namespace ModelViewer
 				show_another_window = false;
 			ImGui::End();
 		}
+	}
 
+	void ImGuiRenderer::renderUI(ModelViewerObject* object)
+	{
+		ImGui::Begin("Controls");
+
+		ImGui::DragFloat3("Position", glm::value_ptr(object->transform.translation));
+		ImGui::DragFloat3("Rotation", glm::value_ptr(object->transform.rotation));
+
+
+		ImGui::End();
+	}
+
+	void ImGuiRenderer::drawUI()
+	{
 		// Rendering
 		ImGui::Render();
 		ImDrawData* main_draw_data = ImGui::GetDrawData();

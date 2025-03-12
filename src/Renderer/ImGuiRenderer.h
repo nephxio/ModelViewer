@@ -1,5 +1,7 @@
 #pragma once
 
+#include "ModelViewerObject.h"
+
 #include "imgui.h"
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_vulkan.h"
@@ -24,6 +26,10 @@ namespace ModelViewer
 		void init();
 
 		void drawDemo(bool show_demo_window, bool show_another_window, ImVec4 clear_color);
+
+		void renderUI(ModelViewerObject* object);
+
+		void drawUI();
 
 		ImGuiIO* getImGuiIO() { return io; }
 
